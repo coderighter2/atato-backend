@@ -1,5 +1,8 @@
 import Web3 from "web3";
 import * as abiJSON from './abi.json';
+import dotenv from "dotenv"
+
+dotenv.config()
 
 const web3 = new Web3(
   new Web3.providers.HttpProvider("https://rinkeby.infura.io/")
