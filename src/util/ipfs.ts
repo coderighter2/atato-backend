@@ -1,20 +1,22 @@
 import { create as ipfsHttpClient } from 'ipfs-http-client'
 import dotenv from "dotenv"
+import * as fs from 'fs'
 
 dotenv.config()
 
 export enum NFTAssetType {
   Image = 'image',
   Video = 'video',
-  Audio = 'audio'
+  Audio = 'audio',
+  Text = 'text'
 }
 
-export async function getMeta(assetFile: File, assetType: NFTAssetType, previewFile?: File, externalLink?: string, description?: string, attributes?:) {
+export async function getMeta(assetFile: string, assetType: NFTAssetType, previewFile?: string, externalLink?: string, description?: string, attributes?: any) {
   const ipfsClinet = ipfsHttpClient({url:process.env.IPFS_API_SERVER})
   const added = await ipfsClinet.add(
       {
-          path: assetFile.name,
-          content: assetFile.stream()
+          path: assetFile,
+          content: fs.createReadStream(assetFile)
       }
   )
   const assetUrl = `${process.env.IPFS_API_SERVER}${added.cid.toString()}`
@@ -28,8 +30,8 @@ export async function getMeta(assetFile: File, assetType: NFTAssetType, previewF
       }
       const previewAdded = await ipfsClinet.add(
           {
-              path: previewFile.name,
-              content: previewFile.stream()
+              path: previewFile,
+              content: fs.createReadStream(previewFile)
           }
       )
       imageUrl = `${process.env.IPFS_API_SERVER}${previewAdded.cid.toString()}`
@@ -40,7 +42,7 @@ export async function getMeta(assetFile: File, assetType: NFTAssetType, previewF
   metadata.image = imageUrl
   metadata.properties = {
       type: assetType,
-      creator: ""
+      creator: process.env.ow
   }
   if (attributes && attributes.length > 0) metadata.attributes = attributes
   if (description && description.length > 0) metadata.description = description
